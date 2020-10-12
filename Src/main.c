@@ -22,6 +22,8 @@
 #include "main.h"
 #include "assignment.h"
 
+#define timeout_cnt_max (uint8_t)253
+
 int main(void)
 {
   /*
@@ -104,28 +106,31 @@ int main(void)
 
 	//type your code for GPIOA pins setup here:
 
-
+    EDGE_TYPE state;
+    uint8_t samples=5,cnt_edges=0;//flag=1
+    //LED_ON;
   while (1)
   {
-	  if(BUTTON_GET_STATE)
-	  {
-		  // 0.25s delay
-		  LL_mDelay(250);
-		  LED_ON;
-		  // 0.25s delay
-		  LL_mDelay(250);
-		  LED_OFF;
-	  }
-	  else
-	  {
-		  // 1s delay
-		  LL_mDelay(1000);
-		  LED_ON;
-		  // 1s delay
-		  LL_mDelay(1000);
-		  LED_OFF;
-	  }
+	//flag=BUTTON_GET_STATE;
+	state=edgeDetect(BUTTON_GET_STATE,samples);
+	if (state==RISE){
+		cnt_edges++;
+		if ((GPIOA_ODR_REG & (1 << led_pin)) ==0)
+			LED_ON;
+		else
+			LED_OFF;
+			/*if(flag==1){
+				LED_OFF;
+				//flag=0;
+			}
+			else{
+			 //LED_ON;
+			 //flag=1;
+			//}*/
+		}
   }
+
+
 
 }
 
@@ -133,10 +138,75 @@ int main(void)
 
 /* USER CODE END 4 */
 
+//define function
+
+EDGE_TYPE edgeDetect(uint8_t pin_state, uint8_t samples){
+uint8_t first_num=pin_state;
+uint8_t counter_null,counter_one=0,time_cnt=0;
+while(1){
+	pin_state= BUTTON_GET_STATE ;
+	if (first_num==0 ){
+		if ( pin_state == 1 )
+			{if (++counter_one>=samples)
+				return FALL;
+			}
+		else
+			counter_one=0;
+
+
+		}
+	else{
+		if (pin_state == 0)
+			{if (++counter_null>=samples)
+				return RISE;
+			}
+		else
+			counter_null=0;
+		}
+
+	//time_cnt++;
+	if ( ++time_cnt >=timeout_cnt_max)
+		return NONE;
+	/*
+	if(first_num==1 ){
+		if(pin_state==0){
+					++counter_null;
+				}else{
+					{++counter_one;
+					counter_null=0;}
+				}
+				if(counter_null==samples){
+
+
+			return FALL;
+		//} else if(counter_one+counter_null==samples+1){
+		//	return NONE;
+		}
+
+	}else{
+		if(pin_state>0){
+					++counter_one;
+				}else{
+					{++counter_null;counter_one=0;}
+				}
+				if(counter_one==samples){
+
+			return  RISE;
+		//} else if(counter_one+counter_null==samples+1){
+		//	return NONE;
+		}
+	}
+	*/
+}
+}
+
+
+
 /**
   * @brief  This function is executed in case of error occurrence.
   * @retval None
   */
+
 void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */

@@ -21,6 +21,10 @@
 #define push_button_bit 3
 #define clock_enable_pA 17
 
+typedef enum edge_type{NONE = 0, RISE = 1, FALL = 2}EDGE_TYPE;
+
+EDGE_TYPE edgeDetect(uint8_t pin_state, uint8_t samples);
+
 //#define	GPIOA_BASE_ADDR			(uint32_t) 0x48000000/* Add GPIO A peripheral base address here. */
 //MODER register
 //#define	GPIOA_MODER_REG			(uint32_t)0x00/* Add moder register address here. */
@@ -71,7 +75,7 @@
 #define LED_OFF					GPIOA_BRR_REG |= (1 << led_pin)/* Add LED_OFF implementation here. */
 
 //#define BUTTON_GET_STATE		!(*((volatile uint32_t *)((uint32_t)(GPIOA_BASE_ADDR + GPIOA_IDR_REG))) & (1 << push_button_bit))/* Add BUTTON_GET_STATE implementation here. */
-#define BUTTON_GET_STATE		!(GPIOA_IDR_REG & (1 << push_button_bit))/* Add BUTTON_GET_STATE implementation here. */
+#define BUTTON_GET_STATE		(1==(!((GPIOA_IDR_REG & (1 << push_button_bit)) & (1 << push_button_bit))))/* Add BUTTON_GET_STATE implementation here. */
 
 
 #endif /* ASSIGNMENT_H_ */
